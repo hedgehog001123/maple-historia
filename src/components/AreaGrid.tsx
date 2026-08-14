@@ -43,7 +43,7 @@ export const AreaGrid = ({ selectedTab, areas, onSelectArea }: AreaGridProps) =>
               </span>
 
               <span className="text-[10px] text-white/80 mt-1 bg-black/30 px-2 py-0.5 rounded-full">
-                {area.monsterCount}
+                {area.count}
               </span>
             </button>
           ))}

@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { LITH_HARBOR_NPCS, LITH_HARBOR_MONSTERS } from '../data/lithHarborDetails';
+import { AREAS } from '../data/areas';
 
 interface SmartTextProps {
   text: string;
-  detailSubTab: 'area' | 'npc' | 'monster';
-  selectedNpcId: string | null;
-  selectedMonsterId: string | null;
-  onSelectNpc: (id: string) => void;
-  onSelectMonster: (id: string) => void;
+  detailSubTab?: 'area' | 'npc' | 'monster';
+  selectedNpcId?: string | null;
+  selectedMonsterId?: string | null;
+  onSelectNpc?: (name: string) => void;
+  onSelectMonster?: (name: string) => void;
 }
 
 export const SmartText = ({
@@ -20,12 +20,14 @@ export const SmartText = ({
 }: SmartTextProps) => {
   const [hoveredTarget, setHoveredTarget] = useState<{
     type: 'npc' | 'monster';
-    id: string;
     name: string;
+    areaName: string;
     image?: string;
   } | null>(null);
 
-  const regex = /\[\[(npc|monster):([a-zA-Z0-9_-]+)\|([^\]]+)\]\]/g;
+  // [[npc:名前|表示ラベル]] または [[monster:名前|表示ラベル]]、あるいは [[npc:名前]] にマッチ
+  // ※ 日本語名や英語名にも対応できるように正規表現を最適化
+  const regex = /\[\[(npc|monster):([^\]|]+)(?:\|([^\]]+))?\]\]/g;
   const parts = [];
   let lastIndex = 0;
   let match;
@@ -36,17 +38,17 @@ export const SmartText = ({
     }
 
     const type = match[1] as 'npc' | 'monster';
-    const targetId = match[2];
-    const label = match[3];
+    const targetName = match[2];
+    const label = match[3] || targetName; // ラベルが未指定なら名前をそのまま使う
 
     // 自己参照チェック（自分自身を開いている時はリンクにしない）
     const isSelf =
-      (type === 'npc' && detailSubTab === 'npc' && targetId === selectedNpcId) ||
-      (type === 'monster' && detailSubTab === 'monster' && targetId === selectedMonsterId);
+      (type === 'npc' && detailSubTab === 'npc' && targetName === selectedNpcId) ||
+      (type === 'monster' && detailSubTab === 'monster' && targetName === selectedMonsterId);
 
     if (isSelf) {
       parts.push(
-        <strong key={`self-${targetId}-${match.index}`} className="font-bold text-amber-950">
+        <strong key={`self-${targetName}-${match.index}`} className="font-bold text-amber-950">
           {label}
         </strong>
       );
@@ -54,27 +56,42 @@ export const SmartText = ({
       continue;
     }
 
-    const targetData =
-      type === 'npc'
-        ? LITH_HARBOR_NPCS.find((n) => n.id === targetId)
-        : LITH_HARBOR_MONSTERS.find((m) => m.id === targetId);
+    // 💡 全地域のデータ (AREAS) から対象の NPC / モンスター を検索
+    let targetData: { name: string; image?: string; areaName: string } | null = null;
+
+    for (const area of AREAS) {
+      if (type === 'npc' && area.npcs) {
+        const found = area.npcs.find((n) => n.name === targetName);
+        if (found) {
+          targetData = { name: found.name, image: found.image, areaName: area.name };
+          break;
+        }
+      } else if (type === 'monster' && area.monsters) {
+        const found = area.monsters.find((m) => m.name === targetName);
+        if (found) {
+          targetData = { name: found.name, image: found.image, areaName: area.name };
+          break;
+        }
+      }
+    }
 
     parts.push(
-      <span key={`${type}-${targetId}-${match.index}`} className="relative inline-block group">
+      <span key={`${type}-${targetName}-${match.index}`} className="relative inline-block group">
         <button
-          onClick={() => {
-            if (type === 'npc') {
-              onSelectNpc(targetId);
-            } else {
-              onSelectMonster(targetId);
+          onClick={(e) => {
+            e.stopPropagation(); // 親カードのクリックイベント発火を防止
+            if (type === 'npc' && onSelectNpc) {
+              onSelectNpc(targetName);
+            } else if (type === 'monster' && onSelectMonster) {
+              onSelectMonster(targetName);
             }
           }}
           onMouseEnter={() => {
             if (targetData) {
               setHoveredTarget({
                 type,
-                id: targetId,
                 name: targetData.name,
+                areaName: targetData.areaName,
                 image: targetData.image,
               });
             }
@@ -85,7 +102,8 @@ export const SmartText = ({
           {label}
         </button>
 
-        {hoveredTarget && hoveredTarget.id === targetId && (
+        {/* ホバー時のポップアップ（ツールチップ） */}
+        {hoveredTarget && hoveredTarget.name === targetData?.name && (
           <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-stone-900 text-amber-100 p-3 rounded-xl shadow-2xl border border-amber-500/40 z-50 pointer-events-none animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center gap-2.5">
               {hoveredTarget.image ? (
@@ -99,10 +117,10 @@ export const SmartText = ({
                   {hoveredTarget.type === 'npc' ? '👤' : '👾'}
                 </div>
               )}
-              <div>
-                <p className="font-bold text-xs text-amber-200">{hoveredTarget.name}</p>
-                <p className="text-[10px] text-amber-400/80">
-                  リス港口 - {hoveredTarget.type === 'npc' ? '人物' : 'モンスター'}
+              <div className="min-w-0 flex-1">
+                <p className="font-bold text-xs text-amber-200 truncate">{hoveredTarget.name}</p>
+                <p className="text-[10px] text-amber-400/80 truncate">
+                  {hoveredTarget.areaName} - {hoveredTarget.type === 'npc' ? '人物' : 'モンスター'}
                 </p>
               </div>
             </div>
