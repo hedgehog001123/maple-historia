@@ -1,27 +1,6 @@
 import { useState } from 'react';
 import { APPENDIX_DATA } from '../data/appendix'; // 👈 読み込むだけ！
 
-interface SubSection {
-  id: string;
-  title: string;
-  content: string;
-}
-
-interface Section {
-  id: string;
-  title: string;
-  content?: string;
-  subSections?: SubSection[];
-  isLocked?: boolean;
-}
-
-interface Chapter {
-  id: string;
-  number: string;
-  title: string;
-  sections: Section[];
-}
-
 export const AppendixView = () => {
   const [selectedChapterId, setSelectedChapterId] = useState<string>('history');
   const [selectedSectionId, setSelectedSectionId] = useState<string>('maple-world');
