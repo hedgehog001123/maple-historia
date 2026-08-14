@@ -153,16 +153,36 @@ const renderSmartText = (text: string) => {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans flex flex-col">
       {/* ヘッダー */}
-      <header className="bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-extrabold tracking-wide drop-shadow-sm">
-            メイプルヒストリア
-          </h1>
-          <span className="text-xs bg-orange-600/60 px-2.5 py-1 rounded-full border border-orange-300/40">
-            WORLD ARCHIVE
-          </span>
-        </div>
-      </header>
+      {/* ヘッダー */}
+<header className="bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md">
+  <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+    {/* 💡 タイトルロゴ（クリックでTOPへ戻る） */}
+    <button
+      onClick={() => {
+        setSelectedTab('maple-world');
+        setSelectedArea(null);
+        setAppendixCat(null);
+        setAppendixItem(null);
+      }}
+      className="text-xl font-extrabold tracking-wide drop-shadow-sm hover:opacity-90 transition cursor-pointer text-left"
+    >
+      メイプルヒストリア
+    </button>
+
+    {/* 💡 ワールドアーカイブバッジ（クリックでTOPへ戻る） */}
+    <button
+      onClick={() => {
+        setSelectedTab('maple-world');
+        setSelectedArea(null);
+        setAppendixCat(null);
+        setAppendixItem(null);
+      }}
+      className="text-xs bg-orange-600/60 hover:bg-orange-600/80 px-2.5 py-1 rounded-full border border-orange-300/40 transition cursor-pointer"
+    >
+      ワールドアーカイブ
+    </button>
+  </div>
+</header>
 
       {/* 🚧 制作中案内バナー 🚧 */}
       <div className="bg-amber-100/80 border-b border-amber-200 text-amber-900 text-xs py-2 px-4 text-center">
