@@ -9,6 +9,7 @@ import { WorldTabs } from './components/WorldTabs';
 import { AppendixView } from './components/AppendixView';
 import { AreaGrid } from './components/AreaGrid';
 import { AreaDetail } from './components/AreaDetail';
+import { Breadcrumb } from './components/Breadcrumb'; // 👈 追加
 
 type TabType = WorldType | 'appendix';
 
@@ -21,13 +22,12 @@ export default function App() {
   const [appendixChapter, setAppendixChapter] = useState<string | null>(null);
   const [appendixSection, setAppendixSection] = useState<string | null>(null);
 
-  // 💡 URLハッシュ解析＆同期ロジック (hashchange イベント対応)
+  // 💡 URLハッシュ解析＆同期ロジック
   useEffect(() => {
     const handleHashChange = () => {
-      const hash = window.location.hash; // 例: "#/appendix/歴史/メイプルワールド" や "#/リス港口/クン"
+      const hash = window.location.hash;
 
       if (!hash || hash === '#/') {
-        // ハッシュがない場合は初期状態
         setSelectedAreaId(null);
         setSelectedEntityId(null);
         setAppendixChapter(null);
@@ -35,13 +35,12 @@ export default function App() {
         return;
       }
 
-      // #/ を除去してスラッシュで分割
       const parts = hash.replace(/^#\//, '').split('/');
       const firstPart = decodeURIComponent(parts[0] || '');
       const secondPart = parts[1] ? decodeURIComponent(parts[1]) : null;
       const thirdPart = parts[2] ? decodeURIComponent(parts[2]) : null;
 
-      // 1. 付録 (Appendix) のURL処理: #/appendix/章/節
+      // 1. 付録 (Appendix) のURL処理
       if (firstPart === 'appendix') {
         setSelectedTab('appendix');
         setSelectedAreaId(null);
@@ -51,7 +50,7 @@ export default function App() {
         return;
       }
 
-      // 2. エリア詳細のURL処理: #/エリア名/エンティティ名
+      // 2. エリア詳細のURL処理
       const matchedArea = AREAS.find((a) => a.id === firstPart || a.name === firstPart);
 
       if (matchedArea) {
@@ -63,7 +62,6 @@ export default function App() {
       }
     };
 
-    // 初回読み込み時とハッシュ変更時に実行
     handleHashChange();
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
@@ -72,7 +70,66 @@ export default function App() {
   const currentAreas = AREAS.filter((area) => area.world === selectedTab);
   const selectedArea = AREAS.find((a) => a.id === selectedAreaId) || null;
 
-  // トップへ戻る
+  // 💡 動的パンくずリストのデータ生成
+  const getBreadcrumbItems = () => {
+    const items = [];
+
+    if (selectedTab === 'appendix') {
+      items.push({
+        label: '別冊付録',
+        onClick: () => {
+          window.location.hash = '#/appendix';
+        },
+      });
+
+      if (appendixChapter) {
+        items.push({
+          label: appendixChapter,
+          onClick: () => {
+            window.location.hash = `#/appendix/${encodeURIComponent(appendixChapter)}`;
+          },
+        });
+      }
+
+      if (appendixSection) {
+        items.push({
+          label: appendixSection,
+        });
+      }
+    } else {
+      const worldNames: Record<WorldType, string> = {
+        'maple-world': 'メイプルワールド',
+        'arcane-river': 'アーケインリバー',
+        grandis: 'グランディス',
+      };
+
+      items.push({
+        label: worldNames[selectedTab as WorldType],
+        onClick: () => {
+          setSelectedAreaId(null);
+          window.location.hash = '#/';
+        },
+      });
+
+      if (selectedArea) {
+        items.push({
+          label: selectedArea.name,
+          onClick: () => {
+            window.location.hash = `#/${encodeURIComponent(selectedArea.id)}`;
+          },
+        });
+
+        if (selectedEntityId) {
+          items.push({
+            label: selectedEntityId,
+          });
+        }
+      }
+    }
+
+    return items;
+  };
+
   const resetToTop = () => {
     window.location.hash = '#/';
   };
@@ -95,6 +152,9 @@ export default function App() {
             }
           }}
         />
+
+        {/* 🍞 パンくずリスト表示エリア */}
+        <Breadcrumb items={getBreadcrumbItems()} />
 
         {selectedTab === 'appendix' ? (
           <AppendixView
