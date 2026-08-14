@@ -10,6 +10,7 @@ import { AppendixView } from './components/AppendixView';
 import { AreaGrid } from './components/AreaGrid';
 import { AreaDetail } from './components/AreaDetail';
 import { Breadcrumb } from './components/Breadcrumb'; // 👈 追加
+import { SearchBar } from './components/SearchBar'; // 👈 インポート
 
 type TabType = WorldType | 'appendix';
 
@@ -140,6 +141,8 @@ export default function App() {
       <NoticeBanner />
 
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
+        <SearchBar />
+
         <WorldTabs
           selectedTab={selectedTab}
           onSelectTab={(tab) => {
