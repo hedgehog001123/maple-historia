@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { AREAS } from '../data/areas';
 import { APPENDIX_DATA } from '../data/appendix';
-import { normalizeForSearch } from '../utils/search';
+import { normalizeForSearch, stripTags } from '../utils/search';
 
 interface SearchResultItem {
   id: string;
@@ -18,9 +18,9 @@ export const SearchBar = () => {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null); // 👈 inputフォーカス用のref
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // 💡 外側クリック判定 ＆ ⌨️ `/` キーボードショートカット
+  // 外側クリック判定 ＆ ⌨️ `/` キーボードショートカット
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
@@ -29,20 +29,17 @@ export const SearchBar = () => {
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      // ユーザーが別の入力フォームを操作中の場合はスキップ
       const target = e.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
         return;
       }
 
-      // `/` キーが押されたら検索欄にフォーカス
       if (e.key === '/') {
-        e.preventDefault(); // `/` が文字入力されるのを防ぐ
+        e.preventDefault();
         inputRef.current?.focus();
         setIsOpen(true);
       }
 
-      // `Escape` キーで検索欄を閉じる＆フォーカス解除
       if (e.key === 'Escape') {
         setIsOpen(false);
         inputRef.current?.blur();
@@ -60,9 +57,7 @@ export const SearchBar = () => {
 
   // 説明文からヒット箇所の前後を切り出す関数
   const extractSnippet = (text: string, rawQuery: string): string => {
-    const cleanText = text.replace(/\[\[(?:npc|monster):[^|]+\|([^\]]+)\]\]/g, '$1')
-                          .replace(/\[\[(?:npc|monster):([^\]]+)\]\]/g, '$1');
-
+    const cleanText = stripTags(text);
     const normText = normalizeForSearch(cleanText);
     const normQuery = normalizeForSearch(rawQuery);
     const index = normText.indexOf(normQuery);
@@ -121,7 +116,8 @@ export const SearchBar = () => {
     AREAS.forEach((area) => {
       // 地域
       const areaPriority = getTitlePriority(area.name);
-      const normAreaDesc = normalizeForSearch(area.description || '');
+      const cleanAreaDesc = stripTags(area.description || '');
+      const normAreaDesc = normalizeForSearch(cleanAreaDesc);
 
       if (areaPriority > 0) {
         results.push({
@@ -147,7 +143,8 @@ export const SearchBar = () => {
       // NPC
       area.npcs?.forEach((npc) => {
         const npcPriority = getTitlePriority(npc.name);
-        const normNpcDesc = normalizeForSearch(npc.description || '');
+        const cleanNpcDesc = stripTags(npc.description || '');
+        const normNpcDesc = normalizeForSearch(cleanNpcDesc);
 
         if (npcPriority > 0) {
           results.push({
@@ -176,7 +173,8 @@ export const SearchBar = () => {
       // モンスター
       area.monsters?.forEach((monster) => {
         const monsterPriority = getTitlePriority(monster.name);
-        const normMonsterDesc = normalizeForSearch(monster.description || '');
+        const cleanMonsterDesc = stripTags(monster.description || '');
+        const normMonsterDesc = normalizeForSearch(cleanMonsterDesc);
 
         if (monsterPriority > 0) {
           results.push({
@@ -208,7 +206,8 @@ export const SearchBar = () => {
       chapter.sections.forEach((section) => {
         const cleanTitle = section.title.replace(/^\d+\.\s*/, '');
         const appPriority = getTitlePriority(cleanTitle);
-        const normContent = normalizeForSearch(section.content || '');
+        const cleanContent = stripTags(section.content || '');
+        const normContent = normalizeForSearch(cleanContent);
 
         if (appPriority > 0) {
           results.push({
