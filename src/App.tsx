@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AREAS } from './data/areas';
-import type { WorldType, Area } from './data/areas';
+import type { WorldType } from './data/areas';
 
 import { Header } from './components/Header';
 import { NoticeBanner } from './components/NoticeBanner';
@@ -14,13 +14,67 @@ type TabType = WorldType | 'appendix';
 
 export default function App() {
   const [selectedTab, setSelectedTab] = useState<TabType>('maple-world');
-  const [selectedArea, setSelectedArea] = useState<Area | null>(null);
+  const [selectedAreaId, setSelectedAreaId] = useState<string | null>(null);
+  const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
+
+  // Appendix（付録）用ハッシュ状態
+  const [appendixChapter, setAppendixChapter] = useState<string | null>(null);
+  const [appendixSection, setAppendixSection] = useState<string | null>(null);
+
+  // 💡 URLハッシュ解析＆同期ロジック (hashchange イベント対応)
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash; // 例: "#/appendix/歴史/メイプルワールド" や "#/リス港口/クン"
+
+      if (!hash || hash === '#/') {
+        // ハッシュがない場合は初期状態
+        setSelectedAreaId(null);
+        setSelectedEntityId(null);
+        setAppendixChapter(null);
+        setAppendixSection(null);
+        return;
+      }
+
+      // #/ を除去してスラッシュで分割
+      const parts = hash.replace(/^#\//, '').split('/');
+      const firstPart = decodeURIComponent(parts[0] || '');
+      const secondPart = parts[1] ? decodeURIComponent(parts[1]) : null;
+      const thirdPart = parts[2] ? decodeURIComponent(parts[2]) : null;
+
+      // 1. 付録 (Appendix) のURL処理: #/appendix/章/節
+      if (firstPart === 'appendix') {
+        setSelectedTab('appendix');
+        setSelectedAreaId(null);
+        setSelectedEntityId(null);
+        setAppendixChapter(secondPart);
+        setAppendixSection(thirdPart);
+        return;
+      }
+
+      // 2. エリア詳細のURL処理: #/エリア名/エンティティ名
+      const matchedArea = AREAS.find((a) => a.id === firstPart || a.name === firstPart);
+
+      if (matchedArea) {
+        setSelectedTab(matchedArea.world);
+        setSelectedAreaId(matchedArea.id);
+        setSelectedEntityId(secondPart);
+        setAppendixChapter(null);
+        setAppendixSection(null);
+      }
+    };
+
+    // 初回読み込み時とハッシュ変更時に実行
+    handleHashChange();
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   const currentAreas = AREAS.filter((area) => area.world === selectedTab);
+  const selectedArea = AREAS.find((a) => a.id === selectedAreaId) || null;
 
+  // トップへ戻る
   const resetToTop = () => {
-    setSelectedTab('maple-world');
-    setSelectedArea(null);
+    window.location.hash = '#/';
   };
 
   return (
@@ -32,20 +86,36 @@ export default function App() {
         <WorldTabs
           selectedTab={selectedTab}
           onSelectTab={(tab) => {
-            setSelectedTab(tab);
-            setSelectedArea(null);
+            if (tab === 'appendix') {
+              window.location.hash = '#/appendix';
+            } else {
+              window.location.hash = '#/';
+              setSelectedTab(tab);
+              setSelectedAreaId(null);
+            }
           }}
         />
 
         {selectedTab === 'appendix' ? (
-          <AppendixView />
+          <AppendixView
+            selectedChapterTitle={appendixChapter}
+            selectedSectionTitle={appendixSection}
+          />
         ) : selectedArea ? (
-          <AreaDetail area={selectedArea} onBack={() => setSelectedArea(null)} />
+          <AreaDetail
+            area={selectedArea}
+            selectedEntityId={selectedEntityId}
+            onBack={() => {
+              window.location.hash = '#/';
+            }}
+          />
         ) : (
           <AreaGrid
             selectedTab={selectedTab as WorldType}
             areas={currentAreas}
-            onSelectArea={(area) => setSelectedArea(area)}
+            onSelectArea={(area) => {
+              window.location.hash = `#/${encodeURIComponent(area.id)}`;
+            }}
           />
         )}
       </main>
