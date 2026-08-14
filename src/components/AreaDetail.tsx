@@ -20,34 +20,38 @@ export const AreaDetail = ({ area, selectedEntityId, onBack }: AreaDetailProps) 
   );
 
   // 💡 URLハッシュ（#/リス港口/クン など）に応じてサブタブ＆選択状態を自動切り替え
+  // 💡 URLハッシュ（selectedEntityId）の変化を感知して、タブと選択状態を強制連動させる
   useEffect(() => {
     if (selectedEntityId) {
-      const isNpc = area.npcs?.some((n) => n.name === selectedEntityId);
-      const isMonster = area.monsters?.some((m) => m.name === selectedEntityId);
+      // デコードして確実に比較（URLから渡ってくる文字列対策）
+      const entityName = decodeURIComponent(selectedEntityId);
+
+      const isNpc = area.npcs?.some((n) => n.name === entityName);
+      const isMonster = area.monsters?.some((m) => m.name === entityName);
 
       if (isNpc) {
         setDetailSubTab('npc');
-        setSelectedNpcName(selectedEntityId);
+        setSelectedNpcName(entityName);
       } else if (isMonster) {
         setDetailSubTab('monster');
-        setSelectedMonsterName(selectedEntityId);
+        setSelectedMonsterName(entityName);
       }
-    } else {
-      setDetailSubTab('area');
     }
   }, [selectedEntityId, area]);
 
-  // エンティティ選択時のハッシュ更新
+  // エンティティ選択時のハッシュ更新 ＆ タブ切り替え
   const handleSelectNpc = (name: string) => {
+    setDetailSubTab('npc'); // 👈 NPCタブへ強制切り替え！
     setSelectedNpcName(name);
     window.location.hash = `#/${area.id}/${encodeURIComponent(name)}`;
   };
 
   const handleSelectMonster = (name: string) => {
+    setDetailSubTab('monster'); // 👈 モンスタータブへ強制切り替え！
     setSelectedMonsterName(name);
     window.location.hash = `#/${area.id}/${encodeURIComponent(name)}`;
   };
-
+  
   const selectedNpc = area.npcs?.find((n) => n.name === selectedNpcName);
   const selectedMonster = area.monsters?.find((m) => m.name === selectedMonsterName);
 
