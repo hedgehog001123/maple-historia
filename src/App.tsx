@@ -1,39 +1,41 @@
-// src/App.tsx
-import { MaplestoryTooltip } from './components/MaplestoryTooltip';
+import React from 'react';
 
-function App() {
+export default function App() {
   return (
-    <div className="min-h-screen bg-amber-50/50 text-gray-800 flex flex-col items-center">
-      {/* 公式風メイプルオレンジのヘッダーバー */}
-      <header className="w-full bg-orange-500 border-b-4 border-orange-600 shadow-md py-4 px-8 mb-8 text-white flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-black tracking-wider drop-shadow">
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
+      {/* メイプルオレンジのヘッダー */}
+      <header className="bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md">
+        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+          <h1 className="text-xl font-extrabold tracking-wide drop-shadow-sm">
             メイプルヒストリア
           </h1>
-          <p className="text-xs text-orange-100 font-medium">
-            Maple Historia - Story & Database
-          </p>
+          <span className="text-xs bg-orange-600/60 px-2.5 py-1 rounded-full border border-orange-300/40">
+            Maple Historia
+          </span>
         </div>
       </header>
 
-      {/* メインコンテンツ（公式風の白い掲示板風カード） */}
-      <main className="max-w-2xl w-full bg-white border border-amber-200 rounded-2xl p-8 shadow-sm mx-4">
-        <article className="space-y-4 text-gray-700 leading-relaxed text-base">
-          <p>
-            かつてビクトリアロードの深部には、恐ろしい
-            <MaplestoryTooltip id="balrog">魔王バルログ</MaplestoryTooltip>
-            が封印されていた。冒険者たちは幾度となくその脅威に立ち向かうこととなる。
+      {/* メインコンテンツ（準備中メッセージ） */}
+      <main className="flex-1 max-w-2xl mx-auto px-6 py-16 flex flex-col items-center justify-center text-center">
+        <div className="bg-white p-8 md:p-12 rounded-2xl shadow-sm border border-slate-200/80 w-full">
+          <div className="text-5xl mb-4">🍁</div>
+          <h2 className="text-2xl font-bold text-slate-800 mb-3">
+            ただいまサイト制作中です！
+          </h2>
+          <p className="text-slate-600 leading-relaxed mb-6 text-sm md:text-base">
+            メイプルストーリーのストーリー＆データベース「メイプルヒストリア」は、現在オープンに向けて鋭意準備を進めております。
           </p>
-
-          <p>
-            一方、アーケインリバーの「夢の都市レヘルン」では、軍団長の一人である
-            <MaplestoryTooltip id="lucid">ルシード</MaplestoryTooltip>
-            が美しい夢の中に人々を囚えていた……。
-          </p>
-        </article>
+          <div className="inline-flex items-center gap-2 bg-orange-50 text-orange-700 px-4 py-2 rounded-lg text-xs font-semibold border border-orange-200/60">
+            <span className="w-2 h-2 rounded-full bg-orange-500 animate-ping"></span>
+            公開をお楽しみに！
+          </div>
+        </div>
       </main>
+
+      {/* フッター */}
+      <footer className="text-center py-6 text-xs text-slate-400 border-t border-slate-200/60">
+        &copy; Maple Historia - Fan Site
+      </footer>
     </div>
   );
 }
-
-export default App;
