@@ -9,8 +9,10 @@ import { WorldTabs } from './components/WorldTabs';
 import { AppendixView } from './components/AppendixView';
 import { AreaGrid } from './components/AreaGrid';
 import { AreaDetail } from './components/AreaDetail';
-import { Breadcrumb } from './components/Breadcrumb'; // 👈 追加
-import { SearchBar } from './components/SearchBar'; // 👈 インポート
+import { Breadcrumb } from './components/Breadcrumb';
+import { SearchBar } from './components/SearchBar';
+
+import HuntingTimer from './components/HuntingTimer';
 
 type TabType = WorldType | 'appendix';
 
@@ -23,10 +25,21 @@ export default function App() {
   const [appendixChapter, setAppendixChapter] = useState<string | null>(null);
   const [appendixSection, setAppendixSection] = useState<string | null>(null);
 
+  // 🥷 隠しページ用の状態を追加
+  const [isSecretTimer, setIsSecretTimer] = useState<boolean>(false);
+
   // 💡 URLハッシュ解析＆同期ロジック
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash;
+
+      // 🛑 隠しページへのアクセスを検知
+      if (hash === '#/secret-timer-777') {
+        setIsSecretTimer(true);
+        return;
+      } else {
+        setIsSecretTimer(false);
+      }
 
       if (!hash || hash === '#/') {
         setSelectedAreaId(null);
@@ -134,6 +147,11 @@ export default function App() {
   const resetToTop = () => {
     window.location.hash = '#/';
   };
+
+  // 🤫 もし隠しページが有効なら、図鑑のUIを一切出さずにタイマーだけを返す！
+  if (isSecretTimer) {
+    return <HuntingTimer />;
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans flex flex-col">
