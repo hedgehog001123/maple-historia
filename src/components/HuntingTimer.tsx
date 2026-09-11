@@ -74,9 +74,8 @@ export default function HuntingTimer() {
             </div>
           </div>
 
-          {/* 操作ボタン */}
-{/* 🎮 操作ボタン群 */}
-<div className="flex flex-col gap-1">
+          {/* 🎮 操作ボタン群 */}
+          <div className="flex flex-col gap-1">
             <div className="flex gap-4">
               <button
                 onClick={() => actions.setIsActive(!state.isActive)}
@@ -107,24 +106,43 @@ export default function HuntingTimer() {
 
         {/* 📊 右カラム：シミュレーター */}
         <div className="bg-slate-800 rounded-xl shadow-2xl p-5 lg:p-6 flex flex-col border border-slate-700">
-          <div className="grid grid-cols-2 gap-4 mb-3 text-sm">
+          
+          {/* ⚙️ アイテムドロップ率・メル獲得率・1回の湧き数・敵レベル 入力フォーム */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 mb-3 text-sm">
             <div className="flex flex-col gap-1">
-              <label className="text-slate-400 text-xs font-bold">ドロ率 (%)</label>
+              <label className="text-slate-400 text-[11px] font-bold truncate" title="アイテムドロップ率 (%)">アイテムドロップ率 (%)</label>
               <input 
                 type="number" value={state.dropRate} onChange={(e) => actions.handleNumInput(e.target.value, actions.setDropRate)}
                 className="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-center font-mono focus:outline-none focus:border-blue-500"
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-slate-400 text-xs font-bold">メル率 (%)</label>
+              <label className="text-slate-400 text-[11px] font-bold truncate" title="メル獲得率 (%)">メル獲得率 (%)</label>
               <input 
                 type="number" value={state.mesoRate} onChange={(e) => actions.handleNumInput(e.target.value, actions.setMesoRate)}
                 className="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-center font-mono focus:outline-none focus:border-blue-500"
               />
             </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-slate-400 text-xs font-bold">1回の湧き数</label>
+              <input 
+                type="number" min="1" value={state.spawnCount} 
+                onChange={(e) => actions.handleNumInput(e.target.value, actions.setSpawnCount, 1)}
+                className="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-center font-mono focus:outline-none focus:border-blue-500 text-yellow-400 font-bold"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-slate-400 text-xs font-bold">敵レベル</label>
+              <input 
+                type="number" min="1" value={state.mobLevel} 
+                onChange={(e) => actions.handleNumInput(e.target.value, actions.setMobLevel, 1)}
+                className="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-center font-mono focus:outline-none focus:border-blue-500 text-cyan-400 font-bold"
+              />
+            </div>
           </div>
 
-          <div className="flex flex-col gap-1 mb-3">
+          {/* 回収率 ＆ ファミリア判定 */}
+          <div className="flex flex-col gap-2 mb-3">
             <div className="flex justify-between items-center">
               <label className="text-slate-400 text-xs font-bold">ドロップ品回収率</label>
               <span className="text-sm font-mono text-blue-400 font-bold">{state.collectionRate}%</span>
@@ -134,30 +152,44 @@ export default function HuntingTimer() {
               value={state.collectionRate} onChange={(e) => actions.setCollectionRate(parseInt(e.target.value, 10))}
               className="w-full accent-blue-500"
             />
+            
+            <label className="flex items-center gap-2 cursor-pointer mt-1 self-start select-none">
+              <input 
+                type="checkbox" 
+                checked={state.hasFamilia} 
+                onChange={(e) => actions.setHasFamilia(e.target.checked)}
+                className="w-4 h-4 accent-blue-500 rounded cursor-pointer"
+              />
+              <span className="text-xs text-slate-300 font-bold">ファミリアのドロップ</span>
+            </label>
           </div>
 
+          {/* 相場設定 */}
           <div className="mb-4 p-3 bg-slate-900 border border-slate-700 rounded-lg">
             <h3 className="text-[11px] font-bold text-slate-400 mb-2">💰 オークション相場設定 (メル)</h3>
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-blue-300">コアジェム</span>
+                <span className="text-sm text-blue-300">コアジェムストーン</span>
                 <input 
                   type="number" value={state.corePrice} onChange={(e) => actions.handleNumInput(e.target.value, actions.setCorePrice)}
                   className="w-28 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-right font-mono text-sm focus:outline-none focus:border-blue-500"
                 />
               </div>
-              <div className="flex justify-between items-center">
+              
+              <div className={`flex justify-between items-center transition-opacity ${state.hasFamilia ? "opacity-100" : "opacity-40"}`}>
                 <span className="text-sm text-gray-300">Nファミリア</span>
                 <input 
                   type="number" value={state.nFamPrice} onChange={(e) => actions.handleNumInput(e.target.value, actions.setNFamPrice)}
-                  className="w-28 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-right font-mono text-sm focus:outline-none focus:border-blue-500"
+                  disabled={!state.hasFamilia}
+                  className="w-28 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-right font-mono text-sm focus:outline-none focus:border-blue-500 disabled:cursor-not-allowed"
                 />
               </div>
-              <div className="flex justify-between items-center">
+              <div className={`flex justify-between items-center transition-opacity ${state.hasFamilia ? "opacity-100" : "opacity-40"}`}>
                 <span className="text-sm text-cyan-300">Rファミリア</span>
                 <input 
                   type="number" value={state.rFamPrice} onChange={(e) => actions.handleNumInput(e.target.value, actions.setRFamPrice)}
-                  className="w-28 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-right font-mono text-sm focus:outline-none focus:border-blue-500"
+                  disabled={!state.hasFamilia}
+                  className="w-28 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-right font-mono text-sm focus:outline-none focus:border-blue-500 disabled:cursor-not-allowed"
                 />
               </div>
             </div>
@@ -167,36 +199,38 @@ export default function HuntingTimer() {
             {/* リアルタイム結果 */}
             <div>
               <h2 className="text-sm font-bold text-slate-300 mb-1 flex items-center gap-1">
-                📊 リアルタイム狩り効率 <span className="text-[10px] font-normal text-slate-500">(列車6)</span>
+                📊 リアルタイム <span className="text-[10px] font-normal text-slate-500">(Lv.{state.mobLevel} / {state.spawnCount}体)</span>
               </h2>
               <div className="bg-slate-900 rounded-lg p-3 font-mono text-xs md:text-sm border border-slate-700">
-                <div className="flex justify-between py-0.5 border-b border-slate-800"><span className="text-slate-400">総討伐数:</span><span className="font-bold">{state.realtime.totalKills.toLocaleString()} 体</span></div>
-                <div className="flex justify-between py-0.5 border-b border-slate-800"><span className="text-slate-400">純メル:</span><span className="text-yellow-500 font-bold">{state.realtime.expectedMeso.toLocaleString()}</span></div>
-                <div className="flex justify-between py-0.5 border-b border-slate-800"><span className="text-slate-400">売却益:</span><span className="text-green-400 font-bold">+{state.realtime.salesMeso.toLocaleString()}</span></div>
+                <div className="flex justify-between py-0.5 border-b border-slate-800"><span className="text-slate-400">倒した数:</span><span className="font-bold">{state.realtime.totalKills.toLocaleString()} 体</span></div>
+                <div className="flex justify-between py-0.5 border-b border-slate-800"><span className="text-slate-400">メル:</span><span className="text-yellow-500 font-bold">{state.realtime.expectedMeso.toLocaleString()}</span></div>
+                <div className="flex justify-between py-0.5 border-b border-slate-800"><span className="text-slate-400">オークション利益:</span><span className="text-green-400 font-bold">+{state.realtime.salesMeso.toLocaleString()}</span></div>
                 <div className="flex justify-between py-0.5 border-b border-slate-800 bg-slate-800/50 -mx-3 px-3"><span className="text-slate-300 font-bold">総獲得メル:</span><span className="text-yellow-400 font-bold">{state.realtime.totalRealtimeMeso.toLocaleString()}</span></div>
-                <div className="flex justify-between py-0.5 border-b border-slate-800 mt-1"><span className="text-slate-400">コアジェム:</span><span className="text-blue-300 font-bold">{state.realtime.rawCore.toFixed(1)}</span></div>
+                <div className="flex justify-between py-0.5 border-b border-slate-800 mt-1"><span className="text-slate-400">コアジェムストーン:</span><span className="text-blue-300 font-bold">{state.realtime.rawCore.toFixed(1)}</span></div>
                 <div className="flex justify-between py-0.5 border-b border-slate-800"><span className="text-slate-400">ソルエルダ:</span><span className="text-purple-300 font-bold">{formatSolErda(state.realtime.rawSolErda)}</span></div>
-                <div className="flex justify-between py-0.5 border-b border-slate-800"><span className="text-slate-400">欠片:</span><span className="text-indigo-300 font-bold">{state.realtime.rawSolFrag.toFixed(1)}</span></div>
-                <div className="flex justify-between py-0.5 border-b border-slate-800"><span className="text-slate-400">Nファミ:</span><span className="text-gray-300 font-bold">{state.realtime.rawNormalFam.toFixed(1)}</span></div>
-                <div className="flex justify-between py-0.5"><span className="text-slate-400">Rファミ:</span><span className="text-cyan-300 font-bold">{state.realtime.rawRareFam.toFixed(1)}</span></div>
+                <div className="flex justify-between py-0.5 border-b border-slate-800"><span className="text-slate-400">ソルエルダの欠片:</span><span className="text-indigo-300 font-bold">{state.realtime.rawSolFrag.toFixed(1)}</span></div>
+                
+                <div className="flex justify-between py-0.5 border-b border-slate-800"><span className="text-slate-400">Nファミリア:</span><span className="text-gray-300 font-bold">{state.hasFamilia ? state.realtime.rawNormalFam.toFixed(1) : "-"}</span></div>
+                <div className="flex justify-between py-0.5"><span className="text-slate-400">Rファミリア:</span><span className="text-cyan-300 font-bold">{state.hasFamilia ? state.realtime.rawRareFam.toFixed(1) : "-"}</span></div>
               </div>
             </div>
 
             {/* 時給結果 */}
             <div>
               <h2 className="text-sm font-bold text-slate-300 mb-1 flex items-center gap-1">
-                ⏳ 時給 <span className="text-[10px] font-normal text-slate-500">(列車6)</span>
+                ⏳ 時給 <span className="text-[10px] font-normal text-slate-500">({(Number(state.spawnCount) || 0) * 480}体/h)</span>
               </h2>
               <div className="bg-slate-900 rounded-lg p-3 font-mono text-xs md:text-sm border border-slate-700">
-                <div className="flex justify-between py-0.5 border-b border-slate-800"><span className="text-slate-400">時給討伐数:</span><span className="font-bold">{state.hourly.hourlyKills.toLocaleString()} 体</span></div>
-                <div className="flex justify-between py-0.5 border-b border-slate-800"><span className="text-slate-400">純メル:</span><span className="text-yellow-500 font-bold">{state.hourly.hourlyMeso.toLocaleString()}</span></div>
-                <div className="flex justify-between py-0.5 border-b border-slate-800"><span className="text-slate-400">売却益:</span><span className="text-green-400 font-bold">+{state.hourly.hourlySales.toLocaleString()}</span></div>
+                <div className="flex justify-between py-0.5 border-b border-slate-800"><span className="text-slate-400">倒した数:</span><span className="font-bold">{state.hourly.hourlyKills.toLocaleString()} 体</span></div>
+                <div className="flex justify-between py-0.5 border-b border-slate-800"><span className="text-slate-400">メル:</span><span className="text-yellow-500 font-bold">{state.hourly.hourlyMeso.toLocaleString()}</span></div>
+                <div className="flex justify-between py-0.5 border-b border-slate-800"><span className="text-slate-400">オークション利益:</span><span className="text-green-400 font-bold">+{state.hourly.hourlySales.toLocaleString()}</span></div>
                 <div className="flex justify-between py-0.5 border-b border-slate-800 bg-slate-800/50 -mx-3 px-3"><span className="text-slate-300 font-bold">総時給メル:</span><span className="text-yellow-400 font-bold">{state.hourly.totalHourlyMeso.toLocaleString()}</span></div>
-                <div className="flex justify-between py-0.5 border-b border-slate-800 mt-1"><span className="text-slate-400">コアジェム:</span><span className="text-blue-300 font-bold">{state.hourly.hRawCore.toFixed(1)}</span></div>
+                <div className="flex justify-between py-0.5 border-b border-slate-800 mt-1"><span className="text-slate-400">コアジェムストーン:</span><span className="text-blue-300 font-bold">{state.hourly.hRawCore.toFixed(1)}</span></div>
                 <div className="flex justify-between py-0.5 border-b border-slate-800"><span className="text-slate-400">ソルエルダ:</span><span className="text-purple-300 font-bold">{formatSolErda(state.hourly.hRawSolErda)}</span></div>
-                <div className="flex justify-between py-0.5 border-b border-slate-800"><span className="text-slate-400">欠片:</span><span className="text-indigo-300 font-bold">{state.hourly.hRawSolFrag.toFixed(1)}</span></div>
-                <div className="flex justify-between py-0.5 border-b border-slate-800"><span className="text-slate-400">Nファミ:</span><span className="text-gray-300 font-bold">{state.hourly.hRawNormalFam.toFixed(1)}</span></div>
-                <div className="flex justify-between py-0.5"><span className="text-slate-400">Rファミ:</span><span className="text-cyan-300 font-bold">{state.hourly.hRawRareFam.toFixed(1)}</span></div>
+                <div className="flex justify-between py-0.5 border-b border-slate-800"><span className="text-slate-400">ソルエルダの欠片:</span><span className="text-indigo-300 font-bold">{state.hourly.hRawSolFrag.toFixed(1)}</span></div>
+                
+                <div className="flex justify-between py-0.5 border-b border-slate-800"><span className="text-slate-400">Nファミリア:</span><span className="text-gray-300 font-bold">{state.hasFamilia ? state.hourly.hRawNormalFam.toFixed(1) : "-"}</span></div>
+                <div className="flex justify-between py-0.5"><span className="text-slate-400">Rファミリア:</span><span className="text-cyan-300 font-bold">{state.hasFamilia ? state.hourly.hRawRareFam.toFixed(1) : "-"}</span></div>
               </div>
             </div>
           </div>
