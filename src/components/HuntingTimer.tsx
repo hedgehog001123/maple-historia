@@ -75,24 +75,33 @@ export default function HuntingTimer() {
           </div>
 
           {/* 操作ボタン */}
-          <div className="flex gap-4">
-            <button
-              onClick={() => actions.setIsActive(!state.isActive)}
-              className={`flex-1 py-3 rounded-lg font-bold text-xl transition-colors shadow-md ${
-                state.isActive ? "bg-red-600 hover:bg-red-700" : "bg-blue-600 hover:bg-blue-700"
-              }`}
-            >
-              {state.isActive ? "一時停止" : state.elapsed === 0 ? "狩り開始！" : "再開"}
-            </button>
-            <button
-              onClick={actions.handleReset}
-              disabled={state.elapsed === 0}
-              className={`w-28 py-3 rounded-lg font-bold transition-colors shadow-md ${
-                state.elapsed === 0 ? "bg-slate-700 text-slate-500 cursor-not-allowed" : "bg-slate-600 hover:bg-slate-500 text-white"
-              }`}
-            >
-              リセット
-            </button>
+{/* 🎮 操作ボタン群 */}
+<div className="flex flex-col gap-1">
+            <div className="flex gap-4">
+              <button
+                onClick={() => actions.setIsActive(!state.isActive)}
+                className={`flex-1 py-3 rounded-lg font-bold text-xl transition-colors shadow-md ${
+                  state.isActive ? "bg-red-600 hover:bg-red-700" : "bg-blue-600 hover:bg-blue-700"
+                }`}
+              >
+                {state.isActive ? "一時停止" : state.elapsed === 0 ? "狩り開始！" : "再開"}
+              </button>
+              <button
+                onClick={actions.handleReset}
+                disabled={state.elapsed === 0}
+                className={`w-28 py-3 rounded-lg font-bold transition-colors shadow-md ${
+                  state.elapsed === 0 ? "bg-slate-700 text-slate-500 cursor-not-allowed" : "bg-slate-600 hover:bg-slate-500 text-white"
+                }`}
+              >
+                リセット
+              </button>
+            </div>
+            
+            {/* ⌨️ ショートカットキーのヒント表示 */}
+            <div className="flex justify-between items-center px-1 text-[10px] text-slate-500 font-mono">
+              <span>[Space] 開始/停止</span>
+              <span>[Shift + R] リセット</span>
+            </div>
           </div>
         </div>
 

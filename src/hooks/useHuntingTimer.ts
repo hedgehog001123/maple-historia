@@ -171,6 +171,33 @@ const playSound = (fileName: string) => {
   const hourlySales = Math.floor(hRawCore * pCore + hRawNormalFam * pNFam + hRawRareFam * pRFam);
   const totalHourlyMeso = hourlyMeso + hourlySales;
 
+  // ⌨️ キーボードショートカット処理
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // 入力フォーム(inputタグ等)にフォーカスがある時はショートカットを発動させない
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
+        return;
+      }
+
+      // Spaceキー: 開始 / 一時停止
+      if (e.code === "Space") {
+        e.preventDefault(); // ページのスクロール動作を防止
+        setIsActive((prev) => !prev);
+      }
+
+      // Shift + R: リセット
+      if (e.shiftKey && (e.key === "R" || e.key === "r")) {
+        e.preventDefault();
+        setIsActive(false);
+        setElapsed(0);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   return {
     state: {
       isActive, elapsed, volume, skillInterval, dropRate, mesoRate,
