@@ -88,16 +88,17 @@ export function useHuntingTimer() {
     }
   }, [isActive]);
 
-  const playSound = (fileName: string, isWarmup = false) => {
+// 🔊 音声を再生する関数（クローンして重ね再生可能に）
+const playSound = (fileName: string) => {
     const baseAudio = audioRefs.current[fileName];
     if (!baseAudio) return;
     
     const playAudio = baseAudio.cloneNode() as HTMLAudioElement;
-    playAudio.volume = isWarmup ? 0.001 : volume;
+    playAudio.volume = volume;
     playAudio.play().catch((e) => console.debug(`${fileName}再生待機:`, e));
   };
 
-  // アラート判定
+  // 🎵 アラート判定（無音ウォームアップを削除し、本番の音声のみ再生）
   useEffect(() => {
     if (elapsed === 0 || !isActive) return;
 
@@ -106,20 +107,14 @@ export function useHuntingTimer() {
     const remExp = EXP_MAX - (elapsed % EXP_MAX);
     const remSkill = currentSkillMax !== Infinity ? currentSkillMax - (elapsed % currentSkillMax) : Infinity;
 
-    // ウォームアップ (5秒前/4秒前)
-    const isWarmup = [remWealth, remExp, remSkill].some(rem => rem === 5 || rem === 4);
-    if (isWarmup) playSound('cursor.mp3', true);
-    if (remWealth === 5 || remWealth === 4) playSound('levelup.mp3', true);
-    if (remExp === 5 || remExp === 4) playSound('yakubutsu.mp3', true);
-    if (remSkill === 5 || remSkill === 4) playSound('meso.mp3', true);
-
-    // 本番再生
+    // 3・2・1秒前のカウントダウン音（cursor.mp3）
     const isWarning = [remWealth, remExp, remSkill].some(rem => rem === 3 || rem === 2 || rem === 1);
-    if (isWarning) playSound('cursor.mp3', false);
+    if (isWarning) playSound('cursor.mp3');
 
-    if (elapsed % WEALTH_MAX === 0) playSound('levelup.mp3', false);
-    if (elapsed % EXP_MAX === 0) playSound('yakubutsu.mp3', false);
-    if (currentSkillMax !== Infinity && elapsed % currentSkillMax === 0) playSound('meso.mp3', false);
+    // バフ終了時の効果音
+    if (elapsed % WEALTH_MAX === 0) playSound('levelup.mp3');
+    if (elapsed % EXP_MAX === 0) playSound('yakubutsu.mp3');
+    if (currentSkillMax !== Infinity && elapsed % currentSkillMax === 0) playSound('meso.mp3');
     
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [elapsed, isActive]);

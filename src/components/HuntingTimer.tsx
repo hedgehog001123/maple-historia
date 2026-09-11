@@ -31,7 +31,7 @@ export default function HuntingTimer() {
             <div className="flex justify-between items-center">
               <span className="font-medium text-sm">マスター音量: {Math.round(state.volume * 100)}%</span>
               <button 
-                onClick={() => actions.playSound('cursor.mp3', false)} 
+                onClick={() => actions.playSound('cursor.mp3')} 
                 className="text-sm bg-slate-600 hover:bg-slate-500 px-3 py-1 rounded transition-colors"
               >
                 🔊 試聴
@@ -46,8 +46,8 @@ export default function HuntingTimer() {
 
           {/* バフタイマー一覧 */}
           <div className="space-y-3 mb-5">
-            <TimerBox label="財物獲得の秘薬" rem={state.remWealth} onPreview={() => actions.playSound('levelup.mp3', false)} />
-            <TimerBox label="経験値バフ" rem={state.remExp} onPreview={() => actions.playSound('yakubutsu.mp3', false)} />
+            <TimerBox label="財物獲得の秘薬" rem={state.remWealth} onPreview={() => actions.playSound('levelup.mp3')} />
+            <TimerBox label="経験値バフ" rem={state.remExp} onPreview={() => actions.playSound('yakubutsu.mp3')} />
             <TimerBox 
               label={
                 <div className="flex items-center gap-2">
@@ -62,7 +62,7 @@ export default function HuntingTimer() {
                   <span>秒</span>
                 </div>
               } 
-              rem={state.remSkill} onPreview={() => actions.playSound('meso.mp3', false)} 
+              rem={state.remSkill} onPreview={() => actions.playSound('meso.mp3')} 
             />
           </div>
 
