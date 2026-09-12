@@ -21,30 +21,30 @@ export function useHuntingTimer() {
   const [volume, setVolume] = useState(0.5);
 
   const [skillInterval, setSkillInterval] = useState<number | string>(getSaved('skillInterval', 60));
-  const [dropRate, setDropRate] = useState<number | string>(getSaved('dropRate', 0)); // 🎯 初期値: 0%
-  const [mesoRate, setMesoRate] = useState<number | string>(getSaved('mesoRate', 0)); // 💰 初期値: 0%
-  const [spawnCount, setSpawnCount] = useState<number | string>(getSaved('spawnCount', 39)); // 👾 初期値: 39体
-  const [mobLevel, setMobLevel] = useState<number | string>(getSaved('mobLevel', 280)); // 😈 初期値: Lv280
+  const [dropRate, setDropRate] = useState<number | string>(getSaved('dropRate', 0));
+  const [mesoRate, setMesoRate] = useState<number | string>(getSaved('mesoRate', 0));
+  const [spawnCount, setSpawnCount] = useState<number | string>(getSaved('spawnCount', 39));
+  const [mobLevel, setMobLevel] = useState<number | string>(getSaved('mobLevel', 280));
   const [hasFamilia, setHasFamilia] = useState<boolean>(getSavedBool('hasFamilia', false));
   
   const [collectionRate, setCollectionRate] = useState<number>(getSaved('collectionRate', 100));
-  const [corePrice, setCorePrice] = useState<number | string>(getSaved('corePrice', 600000)); // 💎 初期値: 60万
-  const [nFamPrice, setNFamPrice] = useState<number | string>(getSaved('nFamPrice', 200000)); // 🃏 初期値: 20万
-  const [rFamPrice, setRFamPrice] = useState<number | string>(getSaved('rFamPrice', 400000)); // 🎴 初期値: 40万
+  const [corePrice, setCorePrice] = useState<number | string>(getSaved('corePrice', 600000));
+  const [nFamPrice, setNFamPrice] = useState<number | string>(getSaved('nFamPrice', 200000));
+  const [rFamPrice, setRFamPrice] = useState<number | string>(getSaved('rFamPrice', 400000));
 
   const audioRefs = useRef<{ [key: string]: HTMLAudioElement }>({});
   const workerRef = useRef<Worker | null>(null);
 
-  // 初期化 (タイトル & 音声ファイル & Web Worker)
   useEffect(() => {
     document.title = "狩りぷるタイマー";
 
-    audioRefs.current = {
-      'cursor.mp3': new Audio('/sounds/cursor.mp3'),
-      'levelup.mp3': new Audio('/sounds/levelup.mp3'),
-      'yakubutsu.mp3': new Audio('/sounds/yakubutsu.mp3'),
-      'meso.mp3': new Audio('/sounds/meso.mp3'),
-    };
+    const soundFiles = ['cursor.mp3', 'levelup.mp3', 'yakubutsu.mp3', 'meso.mp3'];
+    soundFiles.forEach((file) => {
+      const audio = new Audio(`/sounds/${file}`);
+      audio.preload = "auto";
+      audio.load();
+      audioRefs.current[file] = audio;
+    });
 
     const workerCode = `
       let timerId = null;
@@ -100,12 +100,12 @@ export function useHuntingTimer() {
   }, [isActive]);
 
   const playSound = (fileName: string) => {
-    const baseAudio = audioRefs.current[fileName];
-    if (!baseAudio) return;
+    const audio = audioRefs.current[fileName];
+    if (!audio) return;
     
-    const playAudio = baseAudio.cloneNode() as HTMLAudioElement;
-    playAudio.volume = volume;
-    playAudio.play().catch((e) => console.debug(`${fileName}再生待機:`, e));
+    audio.currentTime = 0;
+    audio.volume = volume;
+    audio.play().catch((e) => console.debug(`${fileName}再生待機:`, e));
   };
 
   useEffect(() => {
